@@ -1,0 +1,38 @@
+<html>
+<head>
+    <title>Sample HTA</title>
+    <HTA:APPLICATION
+        ID="SampleHTA"
+        APPLICATIONNAME="Sample HTA Application"
+        BORDER="thin"
+        BORDERSTYLE="normal"
+        CAPTION="yes"
+        MAXIMIZEBUTTON="yes"
+        MINIMIZEBUTTON="yes"
+        SHOWINTASKBAR="yes"
+        SINGLEINSTANCE="yes"
+        SYSMENU="yes"
+        WINDOWSTATE="normal">
+    </HTA:APPLICATION>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Welcome to the Sample HTA</h1>
+<p>This is a basic example of a HTML Application (HTA) file.</p>
+
+<button onclick="showMessage()">Click Me!</button>
+
+<script>
+    function showMessage() {
+        alert("Hello! You clicked the button.");
+   
