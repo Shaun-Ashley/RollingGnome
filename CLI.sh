@@ -1,41 +1,42 @@
 #!/bin/bash
+# Offline Install Script for Wiz CLI on Primary Device (M1 Mac, macOS Sequoia)
+# This script assumes it’s run from within the extracted folder (wizcli-offline-setup)
+#
+# Usage:
+#   cd wizcli-offline-setup
+#   ./install_offline_wizcli.sh
+#
+# It creates a virtual environment, installs setuptools and wheel from local files,
+# then installs wiz-env and its dependencies offline.
 
-set -e
+set -euo pipefail
 
-echo "[*] Starting fresh Wiz CLI offline prep..."
+# Change to the directory where this script is located
+cd "$(dirname "$0")"
 
-# Clean previous setup if it exists
-rm -rf wizcli-offline-setup wizcli_offline.zip
+echo "[*] Starting Wiz CLI offline installation..."
 
-# Create folder structure
-mkdir -p wizcli-offline-setup/packages
-cd wizcli-offline-setup
+# Validate that all required wheels exist in the local packages directory
+for pattern in "wiz_env-*.whl" "ujson-*.whl" "setuptools-*.whl" "wheel-*.whl"; do
+    if ! ls packages/"$pattern" >/dev/null 2>&1; then
+        echo "[✗] ERROR: Missing required wheel: $pattern"
+        exit 1
+    fi
+done
 
-# Optional: create clean venv to ensure isolated downloads
-python3 -m venv tempenv
-source tempenv/bin/activate
+echo "[*] Creating Python virtual environment..."
+python3 -m venv env
+source env/bin/activate
 
-# Upgrade tooling (not required, but clean)
-pip install --upgrade pip setuptools
+echo "[*] Installing offline tools (setuptools and wheel) from local packages..."
+pip install --no-index --find-links=packages setuptools wheel
 
-# Download Wiz CLI and all required dependencies
-echo "[*] Downloading packages..."
-pip download wiz-env -d packages
+echo "[*] Installing Wiz CLI (wiz-env) from offline packages..."
+pip install --no-index --find-links=packages --no-build-isolation wiz-env
 
-# Download known native dependency (ujson)
-pip download ujson -d packages
-
-# Download required build support (setuptools & wheel)
-pip download "setuptools>=48.8.0" wheel -d packages
-
-# Optional: save version list
-pip freeze > wiz-requirements.txt
-
-# Deactivate and clean up the temp venv
-deactivate
-rm -rf tempenv
-
-cd ..
-zip -r wizcli_offline.zip wizcli-offline-setup
-
-echo "[✓] Done! Move 'wizcli_offline.zip' to your offline machine."
+echo ""
+echo "[✓] Wiz CLI installed successfully."
+echo -n "[✓] Wiz CLI version: "
+wiz --version
+echo ""
+echo "To reactivate this environment later, run: source env/bin/activate"
